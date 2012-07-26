@@ -27,17 +27,14 @@ else:
 
         list_mail = [] #リストの作成
         for va_mail in set_mail: #セット型の展開
-            list_mail += [va_mail] #リスト型へ変換し代入
+            list_mail.append(va_mail) #リスト型へ変換し代入
         list_mail.reverse() #読み取った順番になっているのでもとに戻す
-        #sum_mail += [num.group(0) + ',' +  string.join(list_mail, ';')] 
         sum_mail.append(num.group(0) + ',' +  string.join(list_mail, ';'))
         #ID+メールアドレスの結合をリスト型で追加
-        #print sum_mail #デバックプリント
 
     f.close() #ファイル閉じる
 
     sum_mail.sort() #内容をソートして順番をID順にする
-    #print sum_mail #デバックプリント
     
     f = open('custmail.txt', 'w') #custmail.txt として出力
     for write_mail in sum_mail: #リスト型 sum_mail を展開
