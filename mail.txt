@@ -1,0 +1,7 @@
+a@example.com;b@example.com	100000
+c@example.com;d@example.com;e@example.com	100200
+ ;	130000
+a@example.com;a@example.com	222222
+c@example.com;c@example.com;c@example.com	333333
+
+
