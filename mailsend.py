@@ -20,7 +20,8 @@ if __name__ == "__main__":
     msg["To"]      = ",".join(to_address) #ここは "," 区切りでひとつに
     msg["Date"]    = formatdate(localtime=True)
 
-    smtp = smtplib.SMTP()
+    smtp = smtplib.SMTP() #引数を省略すると localhost:25
     smtp.connect()
+    #上記コマンドの引数を省略した場合初期化を明示する必要がある
     smtp.sendmail(from_address, to_address, msg.as_string())
     smtp.close()
