@@ -39,13 +39,17 @@ html_body_result = u"""
 </table>
 """
 radio_parts = u"""
-<input type="radio" name="cust" value="%s" />%s <br>
+<input type="radio" %s name="custname" value="%s" />%s <br>
 """
 
 content ="""
-<form method="POST" action="/cgi-bin/content2.py">
+<form method="POST" action="/cgi-bin/content.py">
 """
-
+def notapplicable():
+    body = u"該当がありません"
+    res = Response()
+    res.set_body(get_htmltemplate() % body)
+    print res
 
 req = Request()
 
@@ -53,10 +57,16 @@ con = MySQLdb.connect(host = 'localhost', db = 'usermanage', user = 'python',
         passwd = 'python', charset = 'utf8')
 cur = con.cursor(MySQLdb.cursors.DictCursor)
 
-str = req.form.getvalue('custname', '')
-radio = req.form.getvalue('cust', '')
+str = req.form.getvalue('custname', 'none')
+radio = req.form.getvalue('cust', 'none')
 
-if radio == "custini":
+if str == "none":
+    body = u"テキストフィールドに検索する文字を入力してください"
+    res = Response()
+    res.set_body(get_htmltemplate() % body)
+    print res
+
+elif radio == "custini":
     cur.execute("""SELECT * FROM main WHERE custini = '%s' """ % str)
     temp = cur.fetchall()
     if temp:
@@ -67,21 +77,18 @@ if radio == "custini":
         res = Response()
         res.set_body(get_htmltemplate() % body)
         print res
-        #result = (get_htmltemplate() % body).encode('utf-8')
-        #print result
     else:
-        body = u"該当がありません"
-        res = Response()
-        res.set_body(get_htmltemplate() % body)
-        print res
+        notapplicable()
 
-else:
+elif radio == "customer":
     cur.execute("""SELECT * FROM main WHERE customer LIKE '%%%s%%' """ %
             (MySQLdb.escape_string(str)))
     temp = cur.fetchall()
     if temp:
+        radio_check = "checked"
         for item in temp:
-            content += radio_parts % (item['customer'], item['customer'])
+            content += radio_parts % (radio_check, item['customer'], item['customer'])
+            radio_check = ""
         content += """<input type="submit" name="submit" value="OK" />"""
         res = Response()
         res.set_body(get_htmltemplate() % content)
@@ -91,3 +98,21 @@ else:
         res = Response()
         res.set_body(get_htmltemplate() % body)
         print res
+
+elif str:
+    cur.execute("""SELECT * FROM main WHERE customer = '%s' """ % str)
+    temp = cur.fetchall()
+    item = temp[0]
+    body = html_body_result % (item['sysID'], item['custini'],
+            item['customer'], item['mail'], item['addr'],
+            item['type'],item['etc'])
+    res = Response()
+    res.set_body(get_htmltemplate() % body)
+    print res
+
+else:
+    body = u"規定外のエラー"
+    res = Response()
+    res.set_body(get_htmltemplate() % body)
+    print res
+
