@@ -38,25 +38,56 @@ html_body_result = u"""
 </tr>
 </table>
 """
+radio_parts = u"""
+<input type="radio" name="cust" value="%s" />%s <br>
+"""
+
+content ="""
+<form method="POST" action="/cgi-bin/content2.py">
+"""
 
 
 req = Request()
 
 con = MySQLdb.connect(host = 'localhost', db = 'usermanage', user = 'python',
         passwd = 'python', charset = 'utf8')
-cur = con.cursor()
+cur = con.cursor(MySQLdb.cursors.DictCursor)
 
 str = req.form.getvalue('custname', '')
 radio = req.form.getvalue('cust', '')
 
 if radio == "custini":
-    test = u"頭文字です"
     cur.execute("""SELECT * FROM main WHERE custini = '%s' """ % str)
-    for item in cur.fetchall():
-        obj = item
+    temp = cur.fetchall()
+    if temp:
+        item = temp[0]
+        body = html_body_result % (item['sysID'], item['custini'],
+                item['customer'], item['mail'], item['addr'],
+                item['type'],item['etc'])
+        res = Response()
+        res.set_body(get_htmltemplate() % body)
+        print res
+        #result = (get_htmltemplate() % body).encode('utf-8')
+        #print result
+    else:
+        body = u"該当がありません"
+        res = Response()
+        res.set_body(get_htmltemplate() % body)
+        print res
 
-#body = html_body_result % (obj[0], obj[1], obj[2], obj[3], obj[4], obj[5], obj[6])
-body = html_body_result % (item[0], item[1], item[2], item[3], item[4], item[5],
-        item[6])
-result = (get_htmltemplate() % body).encode('utf-8')
-print result
+else:
+    cur.execute("""SELECT * FROM main WHERE customer LIKE '%%%s%%' """ %
+            (MySQLdb.escape_string(str)))
+    temp = cur.fetchall()
+    if temp:
+        for item in temp:
+            content += radio_parts % (item['customer'], item['customer'])
+        content += """<input type="submit" name="submit" value="OK" />"""
+        res = Response()
+        res.set_body(get_htmltemplate() % content)
+        print res
+    else:
+        body = u"該当がありません"
+        res = Response()
+        res.set_body(get_htmltemplate() % body)
+        print res
