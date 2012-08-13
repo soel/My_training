@@ -5,39 +5,9 @@ import MySQLdb
 from httphandler import Request, Response, get_htmltemplate
 import cgitb; cgitb.enable()
 import cgi
+from simpletemplate import SimpleTemplate
+from os import path
 
-html_body_result = u"""
-<table border="1" width="750" cellspacing="0" cellpadding="5" bordercolor="#333333">
-<tr>
-<td width = "150">システムID</td>
-<td>%s</td>
-</tr>
-<tr>
-<td>顧客頭文字</td>
-<td>%s</td>
-</tr>
-<tr>
-<td>顧客名</td>
-<td>%s</td>
-</tr>
-<tr>
-<td>メールアドレス</td>
-<td>%s</td>
-</tr>
-<tr>
-<td>住所</td>
-<td>%s</td>
-</tr>
-<tr>
-<td>タイプ</td>
-<td>%s</td>
-</tr>
-<tr>
-<td>備考</td>
-<td>%s</td>
-</tr>
-</table>
-"""
 radio_parts = u"""
 <input type="radio" %s name="custname" value="%s" />%s <br>
 """
@@ -60,6 +30,8 @@ cur = con.cursor(MySQLdb.cursors.DictCursor)
 str = req.form.getvalue('custname', 'none')
 radio = req.form.getvalue('cust', 'none')
 
+template_path = '/var/www/html/cpy/result.html'
+
 if str == "none":
     body = u"テキストフィールドに検索する文字を入力してください"
     res = Response()
@@ -72,11 +44,10 @@ elif radio == "custini":
     temp = cur.fetchall()
     if temp:
         item = temp[0]
-        body = html_body_result % (item['sysID'], item['custini'],
-                item['customer'], item['mail'], item['addr'],
-                item['type'],item['etc'])
+        t = SimpleTemplate(file_path = template_path)
+        body = t.render(item)
         res = Response()
-        res.set_body(get_htmltemplate() % body)
+        res.set_body(body)
         print res
     else:
         notapplicable()
@@ -106,11 +77,10 @@ elif str:
     con.commit()
     temp = cur.fetchall()
     item = temp[0]
-    body = html_body_result % (item['sysID'], item['custini'],
-            item['customer'], item['mail'], item['addr'],
-            item['type'],item['etc'])
+    t = SimpleTemplate(file_path = template_path)
+    body = t.render(item)
     res = Response()
-    res.set_body(get_htmltemplate() % body)
+    res.set_body(body)
     print res
 
 else:
