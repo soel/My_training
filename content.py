@@ -67,7 +67,8 @@ if str == "none":
     print res
 
 elif radio == "custini":
-    cur.execute("""SELECT * FROM main WHERE custini = '%s' """ % str)
+    cur.execute("""SELECT * FROM main WHERE custini = '%s' FOR UPDATE""" % str)
+    con.commit()
     temp = cur.fetchall()
     if temp:
         item = temp[0]
@@ -81,8 +82,9 @@ elif radio == "custini":
         notapplicable()
 
 elif radio == "customer":
-    cur.execute("""SELECT * FROM main WHERE customer LIKE '%%%s%%' """ %
+    cur.execute("""SELECT * FROM main WHERE customer LIKE '%%%s%%' FOR UPDATE""" %
             (MySQLdb.escape_string(str)))
+    con.commit()
     temp = cur.fetchall()
     if temp:
         radio_check = "checked"
@@ -100,7 +102,8 @@ elif radio == "customer":
         print res
 
 elif str:
-    cur.execute("""SELECT * FROM main WHERE customer = '%s' """ % str)
+    cur.execute("""SELECT * FROM main WHERE customer = '%s' FOR UPDATE""" % str)
+    con.commit()
     temp = cur.fetchall()
     item = temp[0]
     body = html_body_result % (item['sysID'], item['custini'],
@@ -116,3 +119,5 @@ else:
     res.set_body(get_htmltemplate() % body)
     print res
 
+cur.close()
+con.close()
