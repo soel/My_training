@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 UCBMAIL=/bin/mail
 TMP=/tmp
